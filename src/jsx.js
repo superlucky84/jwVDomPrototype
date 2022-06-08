@@ -21,24 +21,6 @@ export function h(tag, props, ...children) {
   };
 }
 
-function makeChildren(item) {
-  if (typeof item === 'string') {
-    return {
-      type: 'text',
-      text: item,
-    };
-  }
-
-  return { type: 'element', ...item };
-}
-
-function addStyle(vDom, element) {
-  const { style = {} } = vDom.props;
-  Object.entries(style).forEach(([styleKey, dataValue]) => {
-    element.style[styleKey] = dataValue;
-  });
-}
-
 export function vDomToDom(vDom) {
   const { type, tag, text, props, children = [] } = vDom;
   let element;
@@ -72,5 +54,24 @@ export function vDomToDom(vDom) {
     element.appendChild(elementChildren);
   }
 
+  vDom.el = element;
   return element;
+}
+
+function makeChildren(item) {
+  if (typeof item === 'string') {
+    return {
+      type: 'text',
+      text: item,
+    };
+  }
+
+  return { type: 'element', ...item };
+}
+
+function addStyle(vDom, element) {
+  const { style = {} } = vDom.props;
+  Object.entries(style).forEach(([styleKey, dataValue]) => {
+    element.style[styleKey] = dataValue;
+  });
 }
