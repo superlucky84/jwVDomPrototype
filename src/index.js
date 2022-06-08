@@ -95,10 +95,11 @@ const node = (
   </Fragment>
 );
 
-console.log('NODE = ', node);
+console.log('VDOM = ', node);
 
 const resultElements = vDomToDom(node);
-document.body.appendChild(resultElements);
+
+document.getElementById('root').appendChild(resultElements);
 
 export default {
   node,
