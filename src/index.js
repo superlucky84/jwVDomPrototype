@@ -1,31 +1,18 @@
-import { h, Fragment, vDomToDom } from './jsx';
+import { h, Fragment } from './jsx';
+import { render } from './render';
+import CustomElement from './components/CustomElement';
 
-const v = 'j';
-const w = 'kkk';
 const n = '3';
 
-const node = (
+const vDom = (
   <Fragment>
     <div va={n} style={{ fontWeight: 'bold', color: 'red' }}>
-      <>
-        <span>3ll</span>
-        <span>
-          3lll{w}
-          <b> 7 </b>3www
-        </span>
-      </>
-      ss{v}ss
+      <CustomElement />
     </div>
     <div>kk</div>
   </Fragment>
 );
 
-console.log('VDOM = ', node);
+console.log('VDOM = ', vDom);
 
-const resultElements = vDomToDom(node);
-
-document.getElementById('root').appendChild(resultElements);
-
-export default {
-  node,
-};
+render(vDom, document.getElementById('root'));
