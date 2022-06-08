@@ -1,7 +1,20 @@
+function Fragment(props, children) {
+  return {
+    type: 'fragment',
+    props,
+    children,
+  };
+}
+
 function jsx(tag, props, ...children) {
   const newChildren = children.map(item => makeChildren(item));
 
+  if (typeof tag === 'function') {
+    return tag(props, children);
+  }
+
   return {
+    type: 'element',
     tag,
     props,
     children: newChildren,
@@ -11,11 +24,12 @@ function jsx(tag, props, ...children) {
 function makeChildren(item) {
   if (typeof item === 'string') {
     return {
+      type: 'text',
       text: item,
     };
   }
 
-  return item;
+  return { type: 'element', ...item };
 }
 
 function addStyle(vDom, element) {
@@ -25,36 +39,40 @@ function addStyle(vDom, element) {
   });
 }
 
-function vDomToDom(vDom, wrapElement) {
-  let element = wrapElement;
-  const { tag, text, props, children = [] } = vDom;
+function vDomToDom(vDom) {
+  const { type, tag, text, props, children = [] } = vDom;
+  let element;
 
-  if (tag) {
+  if (type === 'fragment') {
+    element = new DocumentFragment();
+  } else if (type === 'element') {
     element = document.createElement(tag);
+  } else if (type === 'text') {
+    element = document.createTextNode(text);
   }
 
-  if (text) {
-    const newText = document.createTextNode(text);
-    element.appendChild(newText);
+  const elementChildren = children.reduce((acc, childItem) => {
+    const a = vDomToDom(childItem);
+    acc.appendChild(a);
+
+    return acc;
+  }, new DocumentFragment());
+
+  if (props) {
+    Object.entries(props).forEach(([dataKey, dataValue]) => {
+      if (dataKey === 'style') {
+        addStyle(vDom, element);
+      } else {
+        element.setAttribute(dataKey, dataValue);
+      }
+    });
   }
 
-  children.forEach(childItem => {
-    vDomToDom(childItem, element);
-  });
-
-  if (element && element !== wrapElement) {
-    if (props) {
-      Object.entries(props).forEach(([dataKey, dataValue]) => {
-        if (dataKey === 'style') {
-          addStyle(vDom, element);
-        } else {
-          element.setAttribute(dataKey, dataValue);
-        }
-      });
-    }
-
-    wrapElement.appendChild(element);
+  if (elementChildren.hasChildNodes()) {
+    element.appendChild(elementChildren);
   }
+
+  return element;
 }
 
 const v = 'j';
@@ -62,23 +80,25 @@ const w = 'kkk';
 const n = '3';
 
 const node = (
-  <div va={n} style={{ fontWeight: 'bold' }}>
-    <span>3ll</span>
-    <span>
-      3lll{w}
-      <b> 7 </b>3www
-    </span>
-    ss{v}ss
-  </div>
+  <Fragment>
+    <div va={n} style={{ fontWeight: 'bold', color: 'red' }}>
+      <>
+        <span>3ll</span>
+        <span>
+          3lll{w}
+          <b> 7 </b>3www
+        </span>
+      </>
+      ss{v}ss
+    </div>
+    <div>kk</div>
+  </Fragment>
 );
-
-const resultElement = document.createElement('div');
 
 console.log('NODE = ', node);
 
-vDomToDom(node, resultElement);
-
-document.body.appendChild(resultElement);
+const resultElements = vDomToDom(node);
+document.body.appendChild(resultElements);
 
 export default {
   node,
