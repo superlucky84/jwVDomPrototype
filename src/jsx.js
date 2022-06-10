@@ -22,12 +22,14 @@ export function h(tag, props, ...children) {
 }
 
 function makeChildren(item) {
-  if (typeof item === 'string') {
+  if (typeof item === 'string' || typeof item === 'number') {
     return {
       type: 'text',
       text: item,
     };
   }
 
-  return { type: 'element', ...item };
+  item.type = 'element';
+
+  return item;
 }

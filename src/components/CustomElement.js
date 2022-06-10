@@ -1,19 +1,39 @@
 import { h, Fragment } from '../jsx';
 
-export default function CustomElement() {
-  let v = 'j';
-  let w = 'kkk';
-  var handle = () => {
-    console.log('k');
+let seq = 0;
+let value = [];
+
+const useState = initValue => {
+  if (!value) {
+    value = initValue;
+  }
+
+  const setData = newValue => {
+    value = newValue;
   };
 
-  return (
-    <>
-      <span onClick={handle}>3ll</span>
-      <span>
-        3lll{w} {v}
-        <b> 8 </b>
-      </span>
-    </>
+  return [value, setData];
+};
+
+export default function CustomElement(props = {}, children) {
+  let vdom;
+  const [v, setV] = useState(props.vava);
+
+  console.log(props.vava);
+  console.log('V', v);
+
+  const handle = () => {
+    setV(v + 1);
+    console.log(vdom, CustomElement(props, children));
+  };
+
+  vdom = (
+    <span onClick={handle}>
+      {v}-{props?.vava || '1'}
+    </span>
   );
+
+  vdom.key = seq++;
+
+  return vdom;
 }

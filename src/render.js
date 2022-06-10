@@ -3,8 +3,8 @@ export function render(vDom, wrapElement) {
 }
 
 function vDomToDom(vDom) {
-  const { type, tag, text, props, children = [] } = vDom;
   let element;
+  const { type, tag, text, props, children = [] } = vDom;
 
   if (type === 'fragment') {
     element = new DocumentFragment();
