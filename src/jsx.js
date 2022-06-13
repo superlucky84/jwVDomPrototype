@@ -1,30 +1,25 @@
 const keyPrefix = 'custom';
 let seq = 0;
-/*
-let stateCallSeq = 0;
 let value = {};
 
-const useState = (initValue, vdomKey) => {
+const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
   const currentSubSeq = stateCallSeq;
 
   if (!value[vdomKey] || !value[vdomKey][currentSubSeq]) {
     value[vdomKey] ??= {};
     value[vdomKey][currentSubSeq] ??= {};
-
     value[vdomKey][currentSubSeq] = initValue;
   }
 
   const setData = newValue => {
     value[vdomKey][currentSubSeq] = newValue;
+    render();
   };
 
-  stateCallSeq += 1;
-
-  console.log(value);
+  // console.log(value);
 
   return [value[vdomKey][currentSubSeq], setData];
 };
-*/
 
 function getVDomKey(prevVDom) {
   let vdomKey;
@@ -46,25 +41,42 @@ export function Fragment({ props, children }) {
   };
 }
 
-function redrawCustomComponent({ tag, props, children, prevVDom }) {
-  const newVDom = tag({ props, children, prevVDom, redraw: true });
-  const brothers = prevVDom.getBrothers();
-  newVDom.brothers = brothers;
+function redrawCustomComponent({ tag, props, newChildren, prevVDom }) {
+  const prevVDomKey = prevVDom.key;
+  const newVDom = makeCustemElement({ tag, props, newChildren, prevVDomKey });
+  // const brothers = prevVDom.getBrothers();
+  newVDom.getBrothers = prevVDom.getBrothers;
+
+  console.log(newVDom);
 }
 
-function makeCustemElement({ tag, props, newChildren }) {
+function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
   let prevVDom;
+  let stateCallSeq = 0;
   const keyPrefix = tag.name;
+  const vdomKey = prevVDomKey || `${keyPrefix}-${seq}`;
 
   prevVDom = tag({
     props,
     children: newChildren,
-    redrawCustomComponent: ({ props, children }) => {
-      redrawCustomComponent({ tag, props, children, prevVDom });
+    useState: initValue => {
+      const state = useState({
+        initValue,
+        vdomKey,
+        stateCallSeq,
+        render: () => {
+          redrawCustomComponent({ tag, props, newChildren, prevVDom });
+          console.log('RENDER');
+        },
+      });
+
+      stateCallSeq += 1;
+
+      return state;
     },
   });
 
-  prevVDom.key = `${keyPrefix}-${seq}`;
+  prevVDom.key = vdomKey;
   seq += 1;
 
   return prevVDom;
