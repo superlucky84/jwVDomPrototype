@@ -7,7 +7,9 @@ const n = '3';
 const vDom = (
   <Fragment>
     <div va={n} style={{ fontWeight: 'bold', color: 'red' }}>
+      aaa
       <CustomElement vava={1}>asdg</CustomElement>
+      bbb
     </div>
     <div>
       <CustomElement vava={7} />

@@ -26,7 +26,12 @@ const useState = (initValue, vdomKey) => {
   return [value[vdomKey][currentSubSeq], setData];
 };
 
-export default function CustomElement({ props = {}, children, prevVDom }) {
+export default function CustomElement({
+  props = {},
+  children,
+  redrawCustomComponent,
+  prevVDom,
+}) {
   stateCallSeq = 0;
 
   let vdom;
@@ -36,18 +41,17 @@ export default function CustomElement({ props = {}, children, prevVDom }) {
 
   const handle = () => {
     setV(v + 1);
-    redrawComponet({ props, children, vdom });
+    redrawCustomComponent({ props, children });
   };
 
-  vdom = <span onClick={handle}>{v}-vava</span>;
+  vdom = (
+    <div>
+      <span onClick={handle}>{v}-vava</span>
+    </div>
+  );
   vdom.key = vdomKey;
 
   return vdom;
-}
-
-function redrawComponet({ props, children, vdom }) {
-  const newVDom = CustomElement({ props, children, prevVDom: vdom });
-  console.log('NEWVDOM - ', newVDom);
 }
 
 function getVDomKey(prevVDom) {
