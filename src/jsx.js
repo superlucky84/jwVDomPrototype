@@ -1,4 +1,42 @@
-let REDRAW = false;
+const keyPrefix = 'custom';
+let seq = 0;
+/*
+let stateCallSeq = 0;
+let value = {};
+
+const useState = (initValue, vdomKey) => {
+  const currentSubSeq = stateCallSeq;
+
+  if (!value[vdomKey] || !value[vdomKey][currentSubSeq]) {
+    value[vdomKey] ??= {};
+    value[vdomKey][currentSubSeq] ??= {};
+
+    value[vdomKey][currentSubSeq] = initValue;
+  }
+
+  const setData = newValue => {
+    value[vdomKey][currentSubSeq] = newValue;
+  };
+
+  stateCallSeq += 1;
+
+  console.log(value);
+
+  return [value[vdomKey][currentSubSeq], setData];
+};
+*/
+
+function getVDomKey(prevVDom) {
+  let vdomKey;
+  if (prevVDom) {
+    vdomKey = prevVDom.key;
+  } else {
+    vdomKey = `${keyPrefix}-${seq}`;
+    seq += 1;
+  }
+
+  return vdomKey;
+}
 
 export function Fragment({ props, children }) {
   return {
@@ -9,20 +47,30 @@ export function Fragment({ props, children }) {
 }
 
 function redrawCustomComponent({ tag, props, children, prevVDom }) {
-  REDRAW = true;
-
   const newVDom = tag({ props, children, prevVDom, redraw: true });
   const brothers = prevVDom.getBrothers();
   newVDom.brothers = brothers;
+}
 
-  console.log('INDEX', brothers.indexOf(prevVDom));
-  console.log('BROTHERS - ', brothers);
+function makeCustemElement({ tag, props, newChildren }) {
+  let prevVDom;
+  const keyPrefix = tag.name;
 
-  REDRAW = false;
+  prevVDom = tag({
+    props,
+    children: newChildren,
+    redrawCustomComponent: ({ props, children }) => {
+      redrawCustomComponent({ tag, props, children, prevVDom });
+    },
+  });
+
+  prevVDom.key = `${keyPrefix}-${seq}`;
+  seq += 1;
+
+  return prevVDom;
 }
 
 export function h(tag, props, ...children) {
-  console.log('--', tag, REDRAW);
   const node = {
     type: 'element',
     tag,
@@ -46,17 +94,7 @@ export function h(tag, props, ...children) {
   }
   // 사용자 컴포넌트 일때
   else if (typeof tag === 'function') {
-    let prevVDom;
-
-    prevVDom = tag({
-      props,
-      children: newChildren,
-      redrawCustomComponent: ({ props, children }) => {
-        redrawCustomComponent({ tag, props, children, prevVDom });
-      },
-    });
-
-    return prevVDom;
+    return makeCustemElement({ tag, props, newChildren });
   }
 
   node.children = newChildren;
