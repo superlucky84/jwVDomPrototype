@@ -1,4 +1,4 @@
-export function Fragment(props, children) {
+export function Fragment({ props, children }) {
   return {
     type: 'fragment',
     props,
@@ -10,7 +10,7 @@ export function h(tag, props, ...children) {
   const newChildren = children.map(item => makeChildren(item));
 
   if (typeof tag === 'function') {
-    return tag(props, children);
+    return tag({ props, children });
   }
 
   return {

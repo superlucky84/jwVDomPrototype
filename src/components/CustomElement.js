@@ -1,39 +1,63 @@
 import { h, Fragment } from '../jsx';
 
+const keyPrefix = 'custom';
 let seq = 0;
-let value = [];
+let stateCallSeq = 0;
+let value = {};
 
-const useState = initValue => {
-  if (!value) {
-    value = initValue;
+const useState = (initValue, vdomKey) => {
+  const currentSubSeq = stateCallSeq;
+
+  if (!value[vdomKey] || !value[vdomKey][currentSubSeq]) {
+    value[vdomKey] ??= {};
+    value[vdomKey][currentSubSeq] ??= {};
+
+    value[vdomKey][currentSubSeq] = initValue;
   }
 
   const setData = newValue => {
-    value = newValue;
+    value[vdomKey][currentSubSeq] = newValue;
   };
 
-  return [value, setData];
+  stateCallSeq += 1;
+
+  console.log(value);
+
+  return [value[vdomKey][currentSubSeq], setData];
 };
 
-export default function CustomElement(props = {}, children) {
-  let vdom;
-  const [v, setV] = useState(props.vava);
+export default function CustomElement({ props = {}, children, prevVDom }) {
+  stateCallSeq = 0;
 
-  console.log(props.vava);
+  let vdom;
+  const vdomKey = getVDomKey(prevVDom);
+  const [v, setV] = useState(props.vava, vdomKey);
   console.log('V', v);
 
   const handle = () => {
     setV(v + 1);
-    console.log(vdom, CustomElement(props, children));
+    redrawComponet({ props, children, vdom });
   };
 
-  vdom = (
-    <span onClick={handle}>
-      {v}-{props?.vava || '1'}
-    </span>
-  );
-
-  vdom.key = seq++;
+  vdom = <span onClick={handle}>{v}-vava</span>;
+  vdom.key = vdomKey;
 
   return vdom;
+}
+
+function redrawComponet({ props, children, vdom }) {
+  const newVDom = CustomElement({ props, children, prevVDom: vdom });
+  console.log('NEWVDOM - ', newVDom);
+}
+
+function getVDomKey(prevVDom) {
+  let vdomKey;
+  if (prevVDom) {
+    vdomKey = prevVDom.key;
+  } else {
+    vdomKey = `${keyPrefix}-${seq}`;
+    seq += 1;
+  }
+
+  return vdomKey;
 }
