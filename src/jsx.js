@@ -1,6 +1,7 @@
 const keyPrefix = 'custom';
 let seq = 0;
 let value = {};
+let RERENDER = false;
 
 const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
   const currentSubSeq = stateCallSeq;
@@ -42,12 +43,17 @@ export function Fragment({ props, children }) {
 }
 
 function redrawCustomComponent({ tag, props, newChildren, prevVDom }) {
+  RERENDER = true;
+
   const prevVDomKey = prevVDom.key;
   const newVDom = makeCustemElement({ tag, props, newChildren, prevVDomKey });
   // const brothers = prevVDom.getBrothers();
   newVDom.getBrothers = prevVDom.getBrothers;
 
-  console.log(newVDom);
+  console.log('PREVVDOM - ', prevVDom);
+  console.log('NEWVDOM  - ', newVDom);
+
+  RERENDER = false;
 }
 
 function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
@@ -55,6 +61,9 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
   let stateCallSeq = 0;
   const keyPrefix = tag.name;
   const vdomKey = prevVDomKey || `${keyPrefix}-${seq}`;
+  const vdomLoopKey = props?.key;
+
+  console.log(RERENDER);
 
   prevVDom = tag({
     props,
@@ -77,6 +86,10 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
   });
 
   prevVDom.key = vdomKey;
+  if (vdomLoopKey) {
+    prevVDom.loopKey = vdomLoopKey;
+  }
+
   seq += 1;
 
   return prevVDom;
