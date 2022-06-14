@@ -102,6 +102,8 @@ export function h(tag, props, ...children) {
     props,
   };
 
+  console.log('children', children);
+
   const newChildren = children.map(item => {
     return makeChildren({
       item,
@@ -128,7 +130,13 @@ export function h(tag, props, ...children) {
 }
 
 function makeChildren({ item, getBrothers, getParent }) {
-  if (typeof item === 'string' || typeof item === 'number') {
+  if (!item) {
+    return {
+      type: null,
+      getBrothers,
+      getParent,
+    };
+  } else if (typeof item === 'string' || typeof item === 'number') {
     return {
       type: 'text',
       text: item,

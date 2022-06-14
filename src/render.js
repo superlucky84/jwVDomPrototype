@@ -15,8 +15,10 @@ function vDomToDom(vDom) {
   }
 
   const elementChildren = children.reduce((acc, childItem) => {
-    const a = vDomToDom(childItem);
-    acc.appendChild(a);
+    if (childItem.type) {
+      const a = vDomToDom(childItem);
+      acc.appendChild(a);
+    }
 
     return acc;
   }, new DocumentFragment());
