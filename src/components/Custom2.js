@@ -6,7 +6,7 @@ export default function Custom2({ props = {}, children, useState }) {
 
   return (
     <div class="custom2">
-      {number} - {j} - a
+      {number} - {j} - a<article>{children}</article>
     </div>
   );
 }
