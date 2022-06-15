@@ -1,7 +1,6 @@
 const keyPrefix = 'custom';
 let seq = 0;
 let value = {};
-let RERENDER = false;
 
 const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
   const currentSubSeq = stateCallSeq;
@@ -17,46 +16,33 @@ const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
     render();
   };
 
-  // console.log(value);
-
   return [value[vdomKey][currentSubSeq], setData];
 };
 
-function getVDomKey(prevVDom) {
-  let vdomKey;
-  if (prevVDom) {
-    vdomKey = prevVDom.key;
-  } else {
-    vdomKey = `${keyPrefix}-${seq}`;
-    seq += 1;
-  }
-
-  return vdomKey;
-}
-
 export function Fragment({ props, children }) {
-  return {
-    type: 'fragment',
-    props,
-    children,
-  };
+  return { type: 'fragment', props, children };
 }
 
-function redrawCustomComponent({ tag, props, newChildren, prevVDom }) {
-  RERENDER = true;
+export function h(tag, props, ...children) {
+  const nodePointer = { current: null };
+  const newProps = props || {};
+  const newChildren = remakeChildren(nodePointer, children);
+  const node = makeNode({ tag, props: newProps, children: newChildren });
 
+  nodePointer.point = node;
+
+  return node;
+}
+
+function redrawCustomComponent({ tag, props, children, prevVDom }) {
   const prevVDomKey = prevVDom.key;
-  const newVDom = makeCustemElement({ tag, props, newChildren, prevVDomKey });
-  // const brothers = prevVDom.getBrothers();
-  newVDom.getBrothers = prevVDom.getBrothers;
+  const newVDom = makeCustemElement({ tag, props, children, prevVDomKey });
 
   console.log('PREVVDOM - ', prevVDom);
   console.log('NEWVDOM  - ', newVDom);
-
-  RERENDER = false;
 }
 
-function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
+function makeCustemElement({ tag, props, children, prevVDomKey }) {
   let prevVDom;
   let stateCallSeq = 0;
   const keyPrefix = tag.name;
@@ -65,14 +51,14 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
 
   prevVDom = tag({
     props,
-    children: newChildren,
+    children,
     useState: initValue => {
       const state = useState({
         initValue,
         vdomKey,
         stateCallSeq,
         render: () => {
-          redrawCustomComponent({ tag, props, newChildren, prevVDom });
+          redrawCustomComponent({ tag, props, children, prevVDom });
         },
       });
 
@@ -92,65 +78,40 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
   return prevVDom;
 }
 
-export function h(tag, props, ...children) {
-  const node = {
-    type: 'element',
-    tag,
-    props: props || {},
-  };
+function makeNode({ tag, props, children }) {
+  const isFragment = typeof tag === 'function' && tag.name === 'Fragment';
+  const isCustemComponent =
+    typeof tag === 'function' && tag.name !== 'Fragment';
 
-  const newChildren = children.map(item => {
-    return makeChildren({
-      item,
-      getBrothers: () => node.children,
-      getParent: () => node,
-    });
-  });
-
-  // 플레그먼트일때
-  if (typeof tag === 'function' && tag.name === 'Fragment') {
-    return tag({
-      props: props || {},
-      children: newChildren,
-    });
-  }
-  // 사용자 컴포넌트 일때
-  else if (typeof tag === 'function') {
-    const jj = makeCustemElement({ tag, props: props || {}, newChildren });
-
-    return jj;
+  if (isFragment) {
+    return Fragment({ props, children });
+  } else if (isCustemComponent) {
+    return makeCustemElement({ tag, props, children });
   }
 
-  node.children = newChildren;
-
-  return node;
+  return { type: 'element', tag, props, children };
 }
 
-function makeChildren({ item, getBrothers, getParent }) {
-  if (!item) {
-    return {
-      type: null,
-      getBrothers,
-      getParent,
-    };
-  } else if (Array.isArray(item)) {
-    return {
-      type: 'loop',
-      getBrothers,
-      getParent,
-      children: item,
-    };
-  } else if (typeof item === 'string' || typeof item === 'number') {
-    return {
-      type: 'text',
-      text: item,
-      getBrothers,
-      getParent,
-    };
-  }
+function remakeChildren(nodePointer, children) {
+  return children.map(item => {
+    const childItem = makeChildrenItem({ item });
 
-  item.getBrothers = getBrothers;
-  item.getParent = getParent;
+    return {
+      ...childItem,
+      getParent: () => nodePointer.current,
+      getBrothers: () => nodePointer.point.current,
+    };
+  });
+}
+
+function makeChildrenItem({ item }) {
+  if (!item) {
+    return { type: null };
+  } else if (Array.isArray(item)) {
+    return { type: 'loop', children: item };
+  } else if (typeof item === 'string' || typeof item === 'number') {
+    return { type: 'text', text: item };
+  }
 
   return item;
 }
