@@ -63,8 +63,6 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
   const vdomKey = prevVDomKey || `${keyPrefix}-${seq}`;
   const vdomLoopKey = props?.key;
 
-  console.log(RERENDER);
-
   prevVDom = tag({
     props,
     children: newChildren,
@@ -75,7 +73,6 @@ function makeCustemElement({ tag, props, newChildren, prevVDomKey }) {
         stateCallSeq,
         render: () => {
           redrawCustomComponent({ tag, props, newChildren, prevVDom });
-          console.log('RENDER');
         },
       });
 
@@ -99,10 +96,8 @@ export function h(tag, props, ...children) {
   const node = {
     type: 'element',
     tag,
-    props,
+    props: props || {},
   };
-
-  console.log('children', children);
 
   const newChildren = children.map(item => {
     return makeChildren({
@@ -115,13 +110,13 @@ export function h(tag, props, ...children) {
   // 플레그먼트일때
   if (typeof tag === 'function' && tag.name === 'Fragment') {
     return tag({
-      props,
+      props: props || {},
       children: newChildren,
     });
   }
   // 사용자 컴포넌트 일때
   else if (typeof tag === 'function') {
-    return makeCustemElement({ tag, props, newChildren });
+    return makeCustemElement({ tag, props: props || {}, newChildren });
   }
 
   node.children = newChildren;
@@ -145,7 +140,6 @@ function makeChildren({ item, getBrothers, getParent }) {
     };
   }
 
-  item.type = 'element';
   item.getBrothers = getBrothers;
   item.getParent = getParent;
 

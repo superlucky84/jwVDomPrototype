@@ -16,9 +16,6 @@ export default function CustomElement({ props = {}, children, useState }) {
       <span onClick={handle}>
         {v}-{j}-vava
       </span>
-      {[1, 2, 3].map(item => (
-        <Custom2 key={item} number={item} />
-      ))}
     </div>
   );
 }

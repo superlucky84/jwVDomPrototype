@@ -1,20 +1,21 @@
 import { h, Fragment } from './jsx';
 import { render } from './render';
 import CustomElement from './components/CustomElement';
+import Custom2 from './components/Custom2';
 
 const n = '3';
 
 const vDom = (
   <Fragment>
-    <div va={n} style={{ fontWeight: 'bold', color: 'red' }}>
-      aaa
-      <CustomElement vava={1}>asdg</CustomElement>
-      bbb
-    </div>
-    <div>
-      <CustomElement vava={7} />
-    </div>
-    <div>kk</div>
+    <CustomElement vava={7} />
+    <CustomElement vava={7} />
+    <Fragment>
+      <div>3</div>
+      <div>3</div>
+    </Fragment>
+    {[1, 2, 3].map(item => {
+      <Custom2 />;
+    })}
   </Fragment>
 );
 
