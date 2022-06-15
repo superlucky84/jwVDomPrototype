@@ -13,9 +13,9 @@ const vDom = (
       <div>3</div>
       <div>3</div>
     </Fragment>
-    {[1, 2, 3].map(item => {
-      <Custom2 />;
-    })}
+    {[1, 2, 3].map(item => (
+      <Custom2 />
+    ))}
   </Fragment>
 );
 

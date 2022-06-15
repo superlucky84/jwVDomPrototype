@@ -6,7 +6,7 @@ function vDomToDom(vDom) {
   let element;
   const { type, tag, text, props, children = [] } = vDom;
 
-  if (type === 'fragment') {
+  if (type === 'fragment' || type === 'loop') {
     element = new DocumentFragment();
   } else if (type === 'element') {
     element = document.createElement(tag);

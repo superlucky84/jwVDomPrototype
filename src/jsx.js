@@ -116,7 +116,9 @@ export function h(tag, props, ...children) {
   }
   // 사용자 컴포넌트 일때
   else if (typeof tag === 'function') {
-    return makeCustemElement({ tag, props: props || {}, newChildren });
+    const jj = makeCustemElement({ tag, props: props || {}, newChildren });
+
+    return jj;
   }
 
   node.children = newChildren;
@@ -130,6 +132,13 @@ function makeChildren({ item, getBrothers, getParent }) {
       type: null,
       getBrothers,
       getParent,
+    };
+  } else if (Array.isArray(item)) {
+    return {
+      type: 'loop',
+      getBrothers,
+      getParent,
+      children: item,
     };
   } else if (typeof item === 'string' || typeof item === 'number') {
     return {
