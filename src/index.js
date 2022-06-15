@@ -21,4 +21,6 @@ const vDom = (
   </Fragment>
 );
 
+console.log(vDom);
+
 render(vDom, document.getElementById('root'));

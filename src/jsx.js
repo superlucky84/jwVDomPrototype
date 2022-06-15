@@ -2,6 +2,7 @@ export function Fragment({ props, children }) {
   return { type: 'fragment', props, children };
 }
 export function h(tag, props, ...children) {
+  console.log('H', tag);
   const nodePointer = { current: null };
   const newProps = props || {};
   const newChildren = remakeChildren(nodePointer, children);
