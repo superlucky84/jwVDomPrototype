@@ -1,20 +1,21 @@
 export function Fragment({ props, children }) {
   return { type: 'fragment', props, children };
 }
-
 export function h(tag, props, ...children) {
   const nodePointer = { current: null };
   const newProps = props || {};
   const newChildren = remakeChildren(nodePointer, children);
   const node = makeNode({ tag, props: newProps, children: newChildren });
 
-  nodePointer.point = node;
+  nodePointer.current = node;
 
   return node;
 }
 
-function makeCustemElement({ tag, props, children }) {
-  return tag({ props, children });
+function makeCustemNode({ tag, props, children }) {
+  const customNode = tag({ props, children });
+
+  return customNode;
 }
 
 function makeNode({ tag, props, children }) {
@@ -25,32 +26,35 @@ function makeNode({ tag, props, children }) {
   if (isFragment) {
     return Fragment({ props, children });
   } else if (isCustemComponent) {
-    return makeCustemElement({ tag, props, children });
+    return makeCustemNode({ tag, props, children });
   }
 
   return { type: 'element', tag, props, children };
-}
-
-function remakeChildren(nodePointer, children) {
-  return children.map(item => {
-    const childItem = makeChildrenItem({ item });
-
-    return {
-      ...childItem,
-      getParent: () => nodePointer.current,
-      getBrothers: () => nodePointer.point.current,
-    };
-  });
 }
 
 function makeChildrenItem({ item }) {
   if (!item) {
     return { type: null };
   } else if (Array.isArray(item)) {
-    return { type: 'loop', children: item };
+    const nodePointer = { current: null };
+    const children = remakeChildren(nodePointer, item);
+    const node = { type: 'loop', children };
+    nodePointer.current = node;
+
+    return node;
   } else if (typeof item === 'string' || typeof item === 'number') {
     return { type: 'text', text: item };
   }
 
   return item;
+}
+
+function remakeChildren(nodePointer, children) {
+  return children.map(item => {
+    const childItem = makeChildrenItem({ item });
+    childItem.getParent = () => nodePointer.current;
+    childItem.getBrothers = () => nodePointer.current.children;
+
+    return childItem;
+  });
 }

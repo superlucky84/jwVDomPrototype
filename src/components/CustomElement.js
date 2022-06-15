@@ -15,7 +15,9 @@ export default function CustomElement({ props, children }) {
     <div class="jj">
       {v === 9 ? <section>a</section> : null}
       <span onClick={handle}>
-        {v}-{j}-vava
+        <a>
+          {v}-{j}-vava
+        </a>
       </span>
     </div>
   );

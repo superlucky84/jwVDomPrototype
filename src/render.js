@@ -1,4 +1,7 @@
+import { addKey } from './keyManager';
 export function render(vDom, wrapElement) {
+  addKey(vDom);
+  console.log(vDom);
   wrapElement.appendChild(vDomToDom(vDom));
 }
 
