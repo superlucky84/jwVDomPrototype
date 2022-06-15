@@ -1,12 +1,11 @@
 import { h, Fragment } from '../jsx';
 
-export default function Custom2({ props = {}, children, useState }) {
-  const [j] = useState(10);
-  const { number } = props;
+export default function Custom2({ props, children }) {
+  const j = 7;
 
   return (
     <div class="custom2">
-      {number} - {j} - a<article>{children}</article>
+      {j} - a<article>{children}</article>
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import { h, Fragment } from '../jsx';
 import Custom2 from './Custom2';
 
-export default function CustomElement({ props = {}, children, useState }) {
+export default function CustomElement({ props, children }) {
   let v = 7;
-  const [j, setJ] = useState(3);
+  let j = 7;
+  // const [j, setJ] = useState(3);
 
   const handle = () => {
     console.log('a');

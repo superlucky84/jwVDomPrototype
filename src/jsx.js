@@ -1,24 +1,3 @@
-const keyPrefix = 'custom';
-let seq = 0;
-let value = {};
-
-const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
-  const currentSubSeq = stateCallSeq;
-
-  if (!value[vdomKey] || !value[vdomKey][currentSubSeq]) {
-    value[vdomKey] ??= {};
-    value[vdomKey][currentSubSeq] ??= {};
-    value[vdomKey][currentSubSeq] = initValue;
-  }
-
-  const setData = newValue => {
-    value[vdomKey][currentSubSeq] = newValue;
-    render();
-  };
-
-  return [value[vdomKey][currentSubSeq], setData];
-};
-
 export function Fragment({ props, children }) {
   return { type: 'fragment', props, children };
 }
@@ -34,48 +13,8 @@ export function h(tag, props, ...children) {
   return node;
 }
 
-function redrawCustomComponent({ tag, props, children, prevVDom }) {
-  const prevVDomKey = prevVDom.key;
-  const newVDom = makeCustemElement({ tag, props, children, prevVDomKey });
-
-  console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOM  - ', newVDom);
-}
-
-function makeCustemElement({ tag, props, children, prevVDomKey }) {
-  let prevVDom;
-  let stateCallSeq = 0;
-  const keyPrefix = tag.name;
-  const vdomKey = prevVDomKey || `${keyPrefix}-${seq}`;
-  const vdomLoopKey = props?.key;
-
-  prevVDom = tag({
-    props,
-    children,
-    useState: initValue => {
-      const state = useState({
-        initValue,
-        vdomKey,
-        stateCallSeq,
-        render: () => {
-          redrawCustomComponent({ tag, props, children, prevVDom });
-        },
-      });
-
-      stateCallSeq += 1;
-
-      return state;
-    },
-  });
-
-  prevVDom.key = vdomKey;
-  if (vdomLoopKey) {
-    prevVDom.loopKey = vdomLoopKey;
-  }
-
-  seq += 1;
-
-  return prevVDom;
+function makeCustemElement({ tag, props, children }) {
+  return tag({ props, children });
 }
 
 function makeNode({ tag, props, children }) {
