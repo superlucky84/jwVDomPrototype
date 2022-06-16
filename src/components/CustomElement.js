@@ -1,24 +1,23 @@
 import { h, Fragment } from '../jsx';
 import Custom2 from './Custom2';
 
-export default function CustomElement({ props, children }) {
+function jj() {
+  console.log('THIS', this);
+}
+
+export default function CustomElement({ props, children, useState }) {
   let v = 7;
-  let j = 7;
-  // const [j, setJ] = useState(3);
+  const [j, setJ] = useState(3);
+  jj();
 
   const handle = () => {
-    console.log('a');
     setJ(j + 1);
   };
 
   return (
     <div class="jj">
-      {v === 9 ? <section>a</section> : null}
-      <span onClick={handle}>
-        <a>
-          {v}-{j}-vava
-        </a>
-      </span>
+      <span onClick={handle}>{j}-vava</span>
+      <Custom2 />
     </div>
   );
 }

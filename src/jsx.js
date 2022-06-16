@@ -1,8 +1,13 @@
+import { useState } from './hook';
+let RERENDER = false;
+let NEED_DIFF = false;
+let RERENDER_COUNT = 0;
+let RERENDER_STACK = [];
+
 export function Fragment({ props, children }) {
   return { type: 'fragment', props, children };
 }
 export function h(tag, props, ...children) {
-  console.log('H', tag);
   const nodePointer = { current: null };
   const newProps = props || {};
   const newChildren = remakeChildren(nodePointer, children);
@@ -13,10 +18,64 @@ export function h(tag, props, ...children) {
   return node;
 }
 
-function makeCustemNode({ tag, props, children }) {
-  const customNode = tag({ props, children });
+function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
+  RERENDER = true;
+  NEED_DIFF = true;
 
-  return customNode;
+  const newVDom = makeCustemNode({ tag, props, children, stateKey })();
+
+  // 비교
+  console.log('PREVVDOM - ', prevVDom);
+  console.log('NEWVDOM  - ', newVDom);
+  console.log('CHILDREN - ', newVDom.children);
+  /*
+  children = newVDom.children.map(item => {
+    if (typeof item === 'function') {
+      redrawCustomComponent()
+    }
+  });
+  */
+
+  RERENDER = false;
+  NEED_DIFF = false;
+}
+
+function makeCustemNode({ tag, props, children, stateKey }) {
+  console.log('k');
+  const resolve = () => {
+    let stateCallSeq = 0;
+    if (!stateKey) {
+      stateKey = Symbol();
+    }
+    const customNode = tag({
+      props,
+      children,
+      useState: initValue => {
+        const state = useState({
+          initValue,
+          stateCallSeq,
+          stateKey,
+          render: () => {
+            redrawCustomComponent({
+              tag,
+              props,
+              children,
+              prevVDom: customNode,
+              stateKey,
+            });
+          },
+        });
+
+        stateCallSeq += 1;
+
+        return state;
+      },
+    });
+
+    return customNode;
+  };
+
+  return resolve;
 }
 
 function makeNode({ tag, props, children }) {
@@ -27,7 +86,13 @@ function makeNode({ tag, props, children }) {
   if (isFragment) {
     return Fragment({ props, children });
   } else if (isCustemComponent) {
-    return makeCustemNode({ tag, props, children });
+    const makeComponent = makeCustemNode({ tag, props, children });
+
+    if (!NEED_DIFF) {
+      return makeComponent();
+    }
+
+    return makeComponent;
   }
 
   return { type: 'element', tag, props, children };

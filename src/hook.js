@@ -1,20 +1,20 @@
 let value = {};
 
-const useState = ({ initValue, vdomKey, stateCallSeq, render }) => {
+export const useState = ({ initValue, stateKey, stateCallSeq, render }) => {
   const currentSubSeq = stateCallSeq;
 
-  if (!value[vdomKey] || !value[vdomKey][currentSubSeq]) {
-    value[vdomKey] ??= {};
-    value[vdomKey][currentSubSeq] ??= {};
-    value[vdomKey][currentSubSeq] = initValue;
+  if (!value[stateKey] || !value[stateKey][currentSubSeq]) {
+    value[stateKey] ??= {};
+    value[stateKey][currentSubSeq] ??= {};
+    value[stateKey][currentSubSeq] = initValue;
   }
 
   const setData = newValue => {
-    value[vdomKey][currentSubSeq] = newValue;
+    value[stateKey][currentSubSeq] = newValue;
     render();
   };
 
-  return [value[vdomKey][currentSubSeq], setData];
+  return [value[stateKey][currentSubSeq], setData];
 };
 
 /*
