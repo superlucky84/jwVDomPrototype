@@ -1,7 +1,6 @@
 import { useState } from './hook';
-let RERENDER = false;
 let NEED_DIFF = false;
-let RERENDER_COUNT = 0;
+let RENDER_DEPTH = 0;
 let RERENDER_STACK = [];
 
 export function Fragment({ props, children }) {
@@ -19,7 +18,6 @@ export function h(tag, props, ...children) {
 }
 
 function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
-  RERENDER = true;
   NEED_DIFF = true;
 
   const newVDom = makeCustemNode({ tag, props, children, stateKey })();
@@ -28,20 +26,23 @@ function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
   console.log('PREVVDOM - ', prevVDom);
   console.log('NEWVDOM  - ', newVDom);
   console.log('CHILDREN - ', newVDom.children);
-  /*
-  children = newVDom.children.map(item => {
-    if (typeof item === 'function') {
-      redrawCustomComponent()
-    }
-  });
-  */
 
-  RERENDER = false;
+  const isSameVdom = RENDER_DEPTH === 0;
+
+  if (isSameVdom) {
+    newVDom.children.map(item => {
+      const isComponent = typeof item === 'function';
+
+      if (isComponent) {
+      } else {
+      }
+    });
+  }
+
   NEED_DIFF = false;
 }
 
 function makeCustemNode({ tag, props, children, stateKey }) {
-  console.log('k');
   const resolve = () => {
     let stateCallSeq = 0;
     if (!stateKey) {
@@ -88,11 +89,13 @@ function makeNode({ tag, props, children }) {
   } else if (isCustemComponent) {
     const makeComponent = makeCustemNode({ tag, props, children });
 
-    if (!NEED_DIFF) {
-      return makeComponent();
+    if (NEED_DIFF) {
+      makeComponent.tagName = tag.name;
+
+      return makeComponent;
     }
 
-    return makeComponent;
+    return makeComponent();
   }
 
   return { type: 'element', tag, props, children };
