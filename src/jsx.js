@@ -1,6 +1,7 @@
 import { useState } from './hook';
+import diff from './diff';
 let NEED_DIFF = false;
-let RENDER_DEPTH = 0;
+let renderDepth = 0;
 let RERENDER_STACK = [];
 
 export function Fragment({ props, children }) {
@@ -26,18 +27,6 @@ function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
   console.log('PREVVDOM - ', prevVDom);
   console.log('NEWVDOM  - ', newVDom);
   console.log('CHILDREN - ', newVDom.children);
-
-  const isSameVdom = RENDER_DEPTH === 0;
-
-  if (isSameVdom) {
-    newVDom.children.map(item => {
-      const isComponent = typeof item === 'function';
-
-      if (isComponent) {
-      } else {
-      }
-    });
-  }
 
   NEED_DIFF = false;
 }
@@ -72,6 +61,9 @@ function makeCustemNode({ tag, props, children, stateKey }) {
         return state;
       },
     });
+
+    customNode.tagName = tag.name;
+    customNode.stateKey = stateKey;
 
     return customNode;
   };

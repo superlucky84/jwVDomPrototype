@@ -11,6 +11,7 @@ export default function CustomElement({ props, children, useState }) {
     <div class="jj">
       <span onClick={handle}>{j}-vava</span>
       <Custom2 />
+      <Custom2 />
       <div>
         <span>1</span>
         <span>2</span>
