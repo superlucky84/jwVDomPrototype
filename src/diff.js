@@ -19,58 +19,52 @@ function checkCustemComponent(vDom) {
   return typeof tag === 'function' && tag.name !== 'Fragment';
 }
 
-function isSameCustomComponent(originalVdom, newVdom) {
+function checkSameCustomComponent(originalVdom, newVdom) {
   return newVdom.tagName === originalVdom.tagName;
 }
 
-function isSameFragment(originalVdom, newVdom) {}
-
-function isSameElement(originalVdom, newVdom) {}
-
-function isSameText(originalVdom, newVdom) {}
-
-function isSameLoop(originalVdom, newVdom) {}
-
-function isSameTag(originalVdom, newVdom) {
-  // Custom component 일때
-  if (checkCustemComponent(newVdom)) {
-    return isSameCustomComponent(originalVdom, newVdom);
-  }
-  // Element 일때, Loop 일때
-  else if (newVdom.type === 'element' || newVdom.type === 'loop') {
-    return isSameElement(originalVdom, newVdom);
-  }
-  // text 일때
-  else if (newVdom.type === 'text') {
-    return isSameText(originalVdom, newVdom);
-  }
-
-  return true;
+function checkSameFragment({ originalVdom, newVdom }) {
+  return (
+    originalVdom.type === 'fragment' &&
+    originalVdom.children.length === newVdom.children.length
+  );
 }
-export default function vDomDiff(originalVdom, newVdom, renderCount) {
-  const isRoot = renderCount === 0;
-  const isSameTag = isSameTag(originalVdom, newVdom);
-  const isSameVdom = isRoot || isSameTag;
 
-  console.log(originalVdom, newVdom);
+function checkSameElement(originalVdom, newVdom) {
+  return originalVdom.type === 'element' && newVdom.tag === originalVdom.tag;
+}
 
-  if (!isSameVdom) {
-    originalVdom = newVdom;
+export default function vDomDiff({ originalVdom, newVdom }) {
+  const isComponent = checkCustemComponent(newVdom);
+  const isFragment = checkFragment(newVdom);
+
+  if (isComponent) {
+    processingComponent({ originalVdom, newVdom });
+  } else if (isFragment) {
+    processingFragment({ originalVdom, newVdom });
   }
+}
 
-  renderCount += 1;
+function processingFragment({ originalVdom, newVdom }) {
+  const isSameFragment = checkSameFragment({ originalVdom, newVdom });
 
-  return renderCount;
+  console.log('ISSAMEFRAGMENT = ', isSameFragment);
+}
 
-  /*
-  if (isSameVdom) {
-    newVDom.children.map(item => {
-      const isComponent = typeof item === 'function';
+function processingComponent({ originalVdom, newVdom }) {
+  const isRoot = renderCount === 0;
+  const isSameCustomComponent =
+    checkSameCustomComponent(originalVdom, newVdom) || isRoot;
 
-      if (isComponent) {
-      } else {
-      }
+  if (!originalVdom || !isSameCustomComponent) {
+    newVdom = newVdom();
+    newVdom.children.forEach((item, index) => {
+      vDomDiff({ newVdom: item });
+    });
+  } else if (isSameCustomComponent && originalVdom) {
+    newVdom = newVdom(originalVdom.stateKey);
+    newVdom.children.forEach((item, index) => {
+      vDomDiff({ newVdom: item, originalVdom: originalVdom[index] });
     });
   }
-  */
 }

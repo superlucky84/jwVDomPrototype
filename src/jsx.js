@@ -21,7 +21,7 @@ export function h(tag, props, ...children) {
 function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
   NEED_DIFF = true;
 
-  const newVDom = makeCustemNode({ tag, props, children, stateKey })();
+  const newVDom = makeCustemNode({ tag, props, children })(stateKey);
 
   // 비교
   console.log('PREVVDOM - ', prevVDom);
@@ -31,8 +31,8 @@ function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
   NEED_DIFF = false;
 }
 
-function makeCustemNode({ tag, props, children, stateKey }) {
-  const resolve = () => {
+function makeCustemNode({ tag, props, children }) {
+  const resolve = stateKey => {
     let stateCallSeq = 0;
     if (!stateKey) {
       stateKey = Symbol();
