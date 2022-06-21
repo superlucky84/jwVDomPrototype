@@ -10,6 +10,7 @@
  * 3. props와 data가 오리지날 가상돔과 얕은비교를 통해 완전히 같다면 children을 교체하지 않고 끝냄 (일단 구현 생략)
  * 4. props와 datark 오리지날 가상동과 얕은비교를 통해 틀리다면 children을 루프톨면서 배교해줌 (일단 구현생략)
  * 5. loop 타입은 일단 항상 다시 그리고 나중에 개선 (일단 구현 생략)
+ * * Rerender Level
  */
 
 export default function makeNewVdomTree({ originalVdom, newVdom }) {
@@ -71,10 +72,14 @@ function processingLoopElement({ originalVdom, newVdom }) {
 }
 
 function processingTextElement({ originalVdom, newVdom }) {
+  newVdom.needRerender = originalVdom.text !== newVdom.text;
+
   return newVdom;
 }
 
 function processingNullElement({ originalVdom, newVdom }) {
+  newVdom.needRerender = originalVdom.type !== newVdom.type;
+
   return newVdom;
 }
 
