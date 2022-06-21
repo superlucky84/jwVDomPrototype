@@ -17,15 +17,21 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
   const isFragment = checkFragment(newVdom);
   const isTagElement = checkTagElement(newVdom);
   const isLoopElement = checkLoopElement(newVdom);
+  const isTextElement = checkTextElement(newVdom);
+  const isNullElement = checkNullElement(newVdom);
 
   if (isComponent) {
-    processingComponent({ originalVdom, newVdom });
+    return processingComponent({ originalVdom, newVdom });
   } else if (isFragment) {
-    processingFragment({ originalVdom, newVdom });
+    return processingFragment({ originalVdom, newVdom });
   } else if (isTagElement) {
-    processingTagElement({ originalVdom, newVdom });
+    return processingTagElement({ originalVdom, newVdom });
   } else if (isLoopElement) {
-    processingLoopElement({ originalVdom, newVdom });
+    return processingLoopElement({ originalVdom, newVdom });
+  } else if (isTextElement) {
+    return processingTextElement({ originalVdom, newVdom });
+  } else if (isNullElement) {
+    return processingNullElement({ originalVdom, newVdom });
   }
 }
 
@@ -34,15 +40,20 @@ function processingComponent({ originalVdom, newVdom }) {
 
   if (!originalVdom || !isSameCustomComponent) {
     newVdom = newVdom();
-    newVdom.children.forEach(item => {
-      makeNewVdomTree({ newVdom: item });
+    newVdom.children = newVdom.children.map(item => {
+      return makeNewVdomTree({ newVdom: item });
     });
   } else if (originalVdom && isSameCustomComponent) {
     newVdom = newVdom(originalVdom.stateKey);
-    newVdom.children.forEach((item, index) => {
-      makeNewVdomTree({ newVdom: item, originalVdom: originalVdom[index] });
+    newVdom.children = newVdom.children.map((item, index) => {
+      return makeNewVdomTree({
+        newVdom: item,
+        originalVdom: originalVdom[index],
+      });
     });
   }
+
+  return newVdom;
 }
 
 /**
@@ -50,37 +61,59 @@ function processingComponent({ originalVdom, newVdom }) {
  * 추후 키값 있을때는 원본 엘리먼트를 유지하도록 개선 예정
  */
 function processingLoopElement({ originalVdom, newVdom }) {
-  newVdom.children.forEach(item => {
-    makeNewVdomTree({ newVdom: item });
+  newVdom.children = newVdom.children.map(item => {
+    return makeNewVdomTree({ newVdom: item });
   });
+
+  return newVdom;
+}
+
+function processingTextElement({ originalVdom, newVdom }) {
+  return newVdom;
+}
+
+function processingNullElement({ originalVdom, newVdom }) {
+  return newVdom;
 }
 
 function processingTagElement({ originalVdom, newVdom }) {
   const isSameTagElement = checkSameTagElement({ originalVdom, newVdom });
 
   if (!originalVdom || !isSameTagElement) {
-    newVdom.children.forEach(item => {
-      makeNewVdomTree({ newVdom: item });
+    newVdom.children = newVdom.children.map(item => {
+      return makeNewVdomTree({ newVdom: item });
     });
   } else if (originalVdom && isSameTagElement) {
-    newVdom.children.forEach((item, index) => {
-      makeNewVdomTree({ newVdom: item, originalVdom: originalVdom[index] });
+    newVdom.children = newVdom.children.map((item, index) => {
+      return makeNewVdomTree({
+        newVdom: item,
+        originalVdom: originalVdom[index],
+      });
     });
   }
+
+  return newVdom;
 }
 
 function processingFragment({ originalVdom, newVdom }) {
   const isSameFragment = checkSameFragment({ originalVdom, newVdom });
 
   if (!originalVdom || !isSameFragment) {
-    newVdom.children.forEach(item => {
-      makeNewVdomTree({ newVdom: item });
+    newVdom.children = newVdom.children.map(item => {
+      return makeNewVdomTree({ newVdom: item });
     });
   } else if (originalVdom && isSameFragment) {
-    newVdom.children.forEach((item, index) => {
-      makeNewVdomTree({ newVdom: item, originalVdom: originalVdom[index] });
-    });
+    newVdom.children = newVdom.children = newVdom.children.map(
+      (item, index) => {
+        return makeNewVdomTree({
+          newVdom: item,
+          originalVdom: originalVdom[index],
+        });
+      }
+    );
   }
+
+  return newVdom;
 }
 
 function checkCustemComponent(vDom) {
@@ -97,6 +130,14 @@ function checkTagElement(vDom) {
 
 function checkLoopElement(vDom) {
   return vDom.type === 'loop';
+}
+
+function checkTextElement(vDom) {
+  return vDom.type === 'text';
+}
+
+function checkNullElement(vDom) {
+  return !vDom.type;
 }
 
 function checkSameCustomComponent(originalVdom, newVdom) {

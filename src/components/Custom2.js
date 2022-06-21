@@ -5,7 +5,8 @@ export default function Custom2({ props, children }) {
 
   return (
     <div class="custom2">
-      {j} - a<article>{children}</article>
+      {j} - a{props.k}
+      <article>{children}</article>
     </div>
   );
 }

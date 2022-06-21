@@ -23,15 +23,13 @@ function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
 
   const newVDomRenderer = makeCustemNode({ tag, props, children });
 
-  makeNewVdomTree({
+  const newVdomTree = makeNewVdomTree({
     originalVdom: prevVDom,
     newVdom: newVDomRenderer,
   });
 
-  // 비교
   console.log('PREVVDOM - ', prevVDom);
-  // console.log('NEWVDOM  - ', newVDom);
-  // console.log('CHILDREN - ', newVDom.children);
+  console.log('NEWVDOMTREE = ', newVdomTree);
 
   NEED_DIFF = false;
 }
@@ -73,6 +71,8 @@ function makeCustemNode({ tag, props, children }) {
     return customNode;
   };
 
+  resolve.tagName = tag.name;
+
   return resolve;
 }
 
@@ -87,8 +87,6 @@ function makeNode({ tag, props, children }) {
     const makeComponent = makeCustemNode({ tag, props, children });
 
     if (NEED_DIFF) {
-      makeComponent.tagName = tag.name;
-
       return makeComponent;
     }
 
