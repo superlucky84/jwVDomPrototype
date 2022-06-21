@@ -51,6 +51,8 @@ function processingComponent({ originalVdom, newVdom }) {
         originalVdom: originalVdom[index],
       });
     });
+
+    newVdom.el = originalVdom.el;
   }
 
   return newVdom;
@@ -90,6 +92,8 @@ function processingTagElement({ originalVdom, newVdom }) {
         originalVdom: originalVdom[index],
       });
     });
+
+    newVdom.el = originalVdom.el;
   }
 
   return newVdom;
@@ -111,6 +115,7 @@ function processingFragment({ originalVdom, newVdom }) {
         });
       }
     );
+    newVdom.el = originalVdom.el;
   }
 
   return newVdom;

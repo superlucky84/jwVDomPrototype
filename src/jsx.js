@@ -18,7 +18,7 @@ export function h(tag, props, ...children) {
   return node;
 }
 
-function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
+function redrawCustomComponent({ tag, props, children, prevVDom }) {
   NEED_DIFF = true;
 
   const newVDomRenderer = makeCustemNode({ tag, props, children });
@@ -28,8 +28,15 @@ function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
     newVdom: newVDomRenderer,
   });
 
-  console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOMTREE = ', newVdomTree);
+  newVdomTree.getBrothers = prevVDom.getBrothers;
+  newVdomTree.getParent = prevVDom.getParent;
+
+  const brothers = newVdomTree.getBrothers();
+  const index = brothers.indexOf(prevVDom);
+
+  brothers.splice(index, 1, newVdomTree);
+
+  console.log('NEWVDOMTREE - ', brothers);
 
   NEED_DIFF = false;
 }
