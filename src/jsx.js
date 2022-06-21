@@ -1,5 +1,5 @@
 import { useState } from './hook';
-import diff from './diff';
+import makeNewVdomTree from './diff';
 let NEED_DIFF = false;
 let renderDepth = 0;
 let RERENDER_STACK = [];
@@ -21,12 +21,17 @@ export function h(tag, props, ...children) {
 function redrawCustomComponent({ tag, props, children, prevVDom, stateKey }) {
   NEED_DIFF = true;
 
-  const newVDom = makeCustemNode({ tag, props, children })(stateKey);
+  const newVDomRenderer = makeCustemNode({ tag, props, children });
+
+  makeNewVdomTree({
+    originalVdom: prevVDom,
+    newVdom: newVDomRenderer,
+  });
 
   // 비교
   console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOM  - ', newVDom);
-  console.log('CHILDREN - ', newVDom.children);
+  // console.log('NEWVDOM  - ', newVDom);
+  // console.log('CHILDREN - ', newVDom.children);
 
   NEED_DIFF = false;
 }

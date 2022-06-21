@@ -12,37 +12,6 @@
  * 5. loop 타입은 일단 항상 다시 그리고 나중에 개선 (일단 구현 생략)
  */
 
-function checkCustemComponent(vDom) {
-  return typeof vDom === 'function';
-}
-
-function checkFragment(vDom) {
-  return vDom.type === 'fragment';
-}
-
-function checkTagElement(vDom) {
-  return vDom.type === 'element';
-}
-
-function checkLoopElement(vDom) {
-  return vDom.type === 'loop';
-}
-
-function checkSameCustomComponent(originalVdom, newVdom) {
-  return newVdom.tagName === originalVdom.tagName;
-}
-
-function checkSameFragment({ originalVdom, newVdom }) {
-  return (
-    originalVdom.type === 'fragment' &&
-    originalVdom.children.length === newVdom.children.length
-  );
-}
-
-function checkSameTagElement({ originalVdom, newVdom }) {
-  originalVdom.type === 'element' && originalVdom.tag === newVdom.tag;
-}
-
 export default function makeNewVdomTree({ originalVdom, newVdom }) {
   const isComponent = checkCustemComponent(newVdom);
   const isFragment = checkFragment(newVdom);
@@ -57,6 +26,22 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
     processingTagElement({ originalVdom, newVdom });
   } else if (isLoopElement) {
     processingLoopElement({ originalVdom, newVdom });
+  }
+}
+
+function processingComponent({ originalVdom, newVdom }) {
+  const isSameCustomComponent = checkSameCustomComponent(originalVdom, newVdom);
+
+  if (!originalVdom || !isSameCustomComponent) {
+    newVdom = newVdom();
+    newVdom.children.forEach(item => {
+      makeNewVdomTree({ newVdom: item });
+    });
+  } else if (originalVdom && isSameCustomComponent) {
+    newVdom = newVdom(originalVdom.stateKey);
+    newVdom.children.forEach((item, index) => {
+      makeNewVdomTree({ newVdom: item, originalVdom: originalVdom[index] });
+    });
   }
 }
 
@@ -98,18 +83,33 @@ function processingFragment({ originalVdom, newVdom }) {
   }
 }
 
-function processingComponent({ originalVdom, newVdom }) {
-  const isSameCustomComponent = checkSameCustomComponent(originalVdom, newVdom);
+function checkCustemComponent(vDom) {
+  return typeof vDom === 'function';
+}
 
-  if (!originalVdom || !isSameCustomComponent) {
-    newVdom = newVdom();
-    newVdom.children.forEach(item => {
-      makeNewVdomTree({ newVdom: item });
-    });
-  } else if (originalVdom && isSameCustomComponent) {
-    newVdom = newVdom(originalVdom.stateKey);
-    newVdom.children.forEach((item, index) => {
-      makeNewVdomTree({ newVdom: item, originalVdom: originalVdom[index] });
-    });
-  }
+function checkFragment(vDom) {
+  return vDom.type === 'fragment';
+}
+
+function checkTagElement(vDom) {
+  return vDom.type === 'element';
+}
+
+function checkLoopElement(vDom) {
+  return vDom.type === 'loop';
+}
+
+function checkSameCustomComponent(originalVdom, newVdom) {
+  return newVdom.tagName === originalVdom?.tagName;
+}
+
+function checkSameFragment({ originalVdom, newVdom }) {
+  return (
+    originalVdom.type === 'fragment' &&
+    originalVdom.children.length === newVdom.children.length
+  );
+}
+
+function checkSameTagElement({ originalVdom, newVdom }) {
+  return originalVdom?.type === 'element' && originalVdom?.tag === newVdom.tag;
 }
