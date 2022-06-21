@@ -18,7 +18,7 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
   const isTagElement = checkTagElement(newVdom);
   const isLoopElement = checkLoopElement(newVdom);
   const isTextElement = checkTextElement(newVdom);
-  const isNullElement = checkNullElement(newVdom);
+  const isEmptyElement = checkEmptyElement(newVdom);
 
   if (isComponent) {
     return processingComponent({ originalVdom, newVdom });
@@ -30,7 +30,7 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
     return processingLoopElement({ originalVdom, newVdom });
   } else if (isTextElement) {
     return processingTextElement({ originalVdom, newVdom });
-  } else if (isNullElement) {
+  } else if (isEmptyElement) {
     return processingNullElement({ originalVdom, newVdom });
   }
 }
@@ -136,7 +136,7 @@ function checkTextElement(vDom) {
   return vDom.type === 'text';
 }
 
-function checkNullElement(vDom) {
+function checkEmptyElement(vDom) {
   return !vDom.type;
 }
 
