@@ -10,7 +10,13 @@
  * 3. props와 data가 오리지날 가상돔과 얕은비교를 통해 완전히 같다면 children을 교체하지 않고 끝냄 (일단 구현 생략)
  * 4. props와 datark 오리지날 가상동과 얕은비교를 통해 틀리다면 children을 루프톨면서 배교해줌 (일단 구현생략)
  * 5. loop 타입은 일단 항상 다시 그리고 나중에 개선 (일단 구현 생략)
- * * Rerender Level
+ *
+ * * 돔 반영 필요 상태
+ * * * 추가, 삭제, 업데이트
+ * * * * 오리지날이 없으면 추가되는 돔이므로 (추가)
+ * * * * 오리지날이 있고 같은 엘리먼트라고 판단되지 않는 경우 기존 (하위까지 전부 삭제 후 추가)
+ * * * * 오리지날이 있고 같은 타입이며 props나 data가 변경되었으면 (업데이트)
+ * * * * 오리지날이 있고 같은 타입이며 props나 data가 같으면 (방치)
  */
 
 export default function makeNewVdomTree({ originalVdom, newVdom }) {
@@ -38,6 +44,9 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
 
 function processingComponent({ originalVdom, newVdom }) {
   const isSameCustomComponent = checkSameCustomComponent(originalVdom, newVdom);
+  if (!originalVdom) {
+    newVdom.needRerender = 'add';
+  }
 
   if (!originalVdom || !isSameCustomComponent) {
     newVdom = newVdom();
@@ -64,6 +73,7 @@ function processingComponent({ originalVdom, newVdom }) {
  * 추후 키값 있을때는 원본 엘리먼트를 유지하도록 개선 예정
  */
 function processingLoopElement({ originalVdom, newVdom }) {
+  // Todo: 일단 항상 다시 돔에 반영
   newVdom.children = newVdom.children.map(item => {
     return makeNewVdomTree({ newVdom: item });
   });
@@ -71,15 +81,14 @@ function processingLoopElement({ originalVdom, newVdom }) {
   return newVdom;
 }
 
+// renrender ok1
 function processingTextElement({ originalVdom, newVdom }) {
-  newVdom.needRerender = originalVdom.text !== newVdom.text;
+  newVdom.needRerender = newVdom.text !== originalVdom?.text;
 
   return newVdom;
 }
 
 function processingNullElement({ originalVdom, newVdom }) {
-  newVdom.needRerender = originalVdom.type !== newVdom.type;
-
   return newVdom;
 }
 
