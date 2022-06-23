@@ -27,20 +27,25 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
   const isLoopElement = checkLoopElement(newVdom);
   const isTextElement = checkTextElement(newVdom);
   const isEmptyElement = checkEmptyElement(newVdom);
+  let resultVdom;
 
   if (isComponent) {
-    return processingComponent({ originalVdom, newVdom });
+    resultVdom = processingComponent({ originalVdom, newVdom });
   } else if (isFragment) {
-    return processingFragment({ originalVdom, newVdom });
+    resultVdom = processingFragment({ originalVdom, newVdom });
   } else if (isTagElement) {
-    return processingTagElement({ originalVdom, newVdom });
+    resultVdom = processingTagElement({ originalVdom, newVdom });
   } else if (isLoopElement) {
-    return processingLoopElement({ originalVdom, newVdom });
+    resultVdom = processingLoopElement({ originalVdom, newVdom });
   } else if (isTextElement) {
-    return processingTextElement({ originalVdom, newVdom });
+    resultVdom = processingTextElement({ originalVdom, newVdom });
   } else if (isEmptyElement) {
-    return processingNullElement({ originalVdom, newVdom });
+    resultVdom = processingNullElement({ originalVdom, newVdom });
   }
+
+  resultVdom.oldProps = originalVdom.props;
+
+  return resultVdom;
 }
 
 function processingComponent({ originalVdom, newVdom }) {

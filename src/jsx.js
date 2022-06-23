@@ -1,5 +1,6 @@
 import { useState } from './hook';
 import makeNewVdomTree from './diff';
+import { vDomUpdate } from './render';
 let NEED_DIFF = false;
 let renderDepth = 0;
 let RERENDER_STACK = [];
@@ -37,7 +38,8 @@ function redrawCustomComponent({ tag, props, children, prevVDom }) {
   brothers.splice(index, 1, newVdomTree);
 
   console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOMTREE - ', newVdomTree);
+  // console.log('NEWVDOMTREE - ', newVdomTree);
+  vDomUpdate(newVdomTree);
 
   NEED_DIFF = false;
 }

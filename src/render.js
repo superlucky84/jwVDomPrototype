@@ -5,6 +5,75 @@ export function render(vDom, wrapElement) {
   wrapElement.appendChild(vDomToDom(vDom));
 }
 
+export function vDomUpdate(newVdomTree) {
+  const { needRerender } = newVdomTree;
+
+  // console.log('NEWVDOMTREE - ', newVdomTree);
+  // console.log('NEEDRERENDER - ', needRerender);
+
+  // ADD, DELETE, DELETE-ADD, UPDATE, NONE
+  switch (needRerender) {
+    case 'ADD':
+      break;
+    case 'DELETE':
+      break;
+    case 'DELETE-ADD':
+      typeDeleteAdd(newVdomTree);
+      break;
+    case 'UPDATE':
+      typeUpdate(newVdomTree);
+      break;
+    case 'NONE':
+      break;
+  }
+}
+
+function typeDeleteAdd(newVdom) {
+  console.log('DELTE-ADD');
+  const element = newVdom.el;
+
+  if (element) {
+    removeEvent(newVdom.oldProps, element);
+    updateProps(newVdom.props, element);
+
+    delete newVdom.oldProps;
+  }
+}
+
+function typeUpdate(newVdom) {
+  const element = newVdom.el;
+
+  if (element) {
+    removeEvent(newVdom.oldProps, element);
+    updateProps(newVdom.props, element);
+
+    delete newVdom.oldProps;
+  }
+
+  newVdom.children.forEach(childItem => {
+    vDomUpdate(childItem);
+  });
+}
+
+function removeEvent(oldProps, element) {
+  if (oldProps.onClick) {
+    element.removeEventListener('click', oldProps.onClick);
+  }
+}
+
+function updateProps(props, element) {
+  Object.entries(props).forEach(([dataKey, dataValue]) => {
+    if (dataKey === 'style') {
+      addStyle(vDom, element);
+    } else if (dataKey === 'onClick') {
+      console.log('KK - ', element.onclick);
+      element.addEventListener('click', dataValue);
+    } else {
+      element.setAttribute(dataKey, dataValue);
+    }
+  });
+}
+
 function vDomToDom(vDom) {
   let element;
   const { type, tag, text, props, children = [] } = vDom;
@@ -27,15 +96,7 @@ function vDomToDom(vDom) {
   }, new DocumentFragment());
 
   if (props) {
-    Object.entries(props).forEach(([dataKey, dataValue]) => {
-      if (dataKey === 'style') {
-        addStyle(vDom, element);
-      } else if (dataKey === 'onClick') {
-        element.addEventListener('click', dataValue);
-      } else {
-        element.setAttribute(dataKey, dataValue);
-      }
-    });
+    updateProps(props, element);
   }
 
   if (elementChildren.hasChildNodes()) {
