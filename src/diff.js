@@ -12,11 +12,12 @@
  * 5. loop 타입은 일단 항상 다시 그리고 나중에 개선 (일단 구현 생략)
  *
  * * 돔 반영 필요 상태
- * * * 추가, 삭제, 업데이트
- * * * * 오리지날이 없으면 추가되는 돔이므로 (추가)
- * * * * 오리지날이 있고 같은 엘리먼트라고 판단되지 않는 경우 기존 (하위까지 전부 삭제 후 추가)
- * * * * 오리지날이 있고 같은 타입이며 props나 data가 변경되었으면 (업데이트)
- * * * * 오리지날이 있고 같은 타입이며 props나 data가 같으면 (방치)
+ * * * ADD, DELETE, DELETE-ADD, UPDATE, NONE
+ * * * * (ADD). 오리지날이 없으면 추가되는 돔이므로 (추가, children들까지 재귀돌면서 전부 추가)
+ * * * * (DELETE-ADD). 오리지날이 있고 같은 엘리먼트타입이 아닌 경우 기존 (삭제 후 추가,  children들까지 재귀돌면서 전부 추가)
+ * * * * (DELETE). 오리지날이 있고 새로운 엘리먼트 타입은 null타입일 경우 (삭제)
+ * * * * (UPDATE). 오리지날이 있고 같은 타입이며 props나 data가 변경되었으면 (돔 속성이나 에트리뷰트만 변경 후 children 재귀 체크)
+ * * * * (NONE). 오리지날이 있고 같은 타입이며 props나 data가 같으면 (방치 후 children 재귀 체크) (Todo)
  */
 
 export default function makeNewVdomTree({ originalVdom, newVdom }) {
@@ -44,8 +45,13 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
 
 function processingComponent({ originalVdom, newVdom }) {
   const isSameCustomComponent = checkSameCustomComponent(originalVdom, newVdom);
+
   if (!originalVdom) {
-    newVdom.needRerender = 'add';
+    newVdom.needRerender = 'ADD';
+  } else if (!isSameCustomComponent) {
+    newVdom.needRerender = 'DELETE-ADD';
+  } else if (isSameCustomComponent) {
+    newVdom.needRerender = 'UPDATE';
   }
 
   if (!originalVdom || !isSameCustomComponent) {
@@ -73,6 +79,16 @@ function processingComponent({ originalVdom, newVdom }) {
  * 추후 키값 있을때는 원본 엘리먼트를 유지하도록 개선 예정
  */
 function processingLoopElement({ originalVdom, newVdom }) {
+  const isSameLoopElement = checkSameLoopElement(originalVdom, newVdom);
+
+  if (!originalVdom) {
+    newVdom.needRerender = 'ADD';
+  } else if (!isSameLoopElement) {
+    newVdom.needRerender = 'DELETE-ADD';
+  } else if (isSameLoopElement) {
+    newVdom.needRerender = 'UPDATE';
+  }
+
   // Todo: 일단 항상 다시 돔에 반영
   newVdom.children = newVdom.children.map(item => {
     return makeNewVdomTree({ newVdom: item });
@@ -83,12 +99,22 @@ function processingLoopElement({ originalVdom, newVdom }) {
 
 // renrender ok1
 function processingTextElement({ originalVdom, newVdom }) {
-  newVdom.needRerender = newVdom.text !== originalVdom?.text;
+  const isSameTextElement = checkSameTextElement(originalVdom, newVdom);
+
+  if (!originalVdom) {
+    newVdom.needRerender = 'ADD';
+  } else if (isSameTextElement) {
+    newVdom.needRerender = 'NONE';
+  } else {
+    newVdom.needRerender = 'DELETE-ADD';
+  }
 
   return newVdom;
 }
 
 function processingNullElement({ originalVdom, newVdom }) {
+  newVdom.needRerender = 'DELETE';
+
   return newVdom;
 }
 
@@ -115,6 +141,14 @@ function processingTagElement({ originalVdom, newVdom }) {
 
 function processingFragment({ originalVdom, newVdom }) {
   const isSameFragment = checkSameFragment({ originalVdom, newVdom });
+
+  if (!originalVdom) {
+    newVdom.needRerender = 'ADD';
+  } else if (!isSameFragment) {
+    newVdom.needRerender = 'DELETE-ADD';
+  } else if (isSameFragment) {
+    newVdom.needRerender = 'UPDATE';
+  }
 
   if (!originalVdom || !isSameFragment) {
     newVdom.children = newVdom.children.map(item => {
@@ -172,4 +206,12 @@ function checkSameFragment({ originalVdom, newVdom }) {
 
 function checkSameTagElement({ originalVdom, newVdom }) {
   return originalVdom?.type === 'element' && originalVdom?.tag === newVdom.tag;
+}
+
+function checkSameLoopElement({ originalVdom, newVdom }) {
+  return originalVdom?.type === newVdom.type;
+}
+
+function checkSameTextElement({ originalVdom, newVdom }) {
+  return originalVdom?.type === newVdom.type;
 }
