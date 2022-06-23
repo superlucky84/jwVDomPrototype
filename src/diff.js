@@ -44,15 +44,10 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
 }
 
 function processingComponent({ originalVdom, newVdom }) {
-  const isSameCustomComponent = checkSameCustomComponent(originalVdom, newVdom);
-
-  if (!originalVdom) {
-    newVdom.needRerender = 'ADD';
-  } else if (!isSameCustomComponent) {
-    newVdom.needRerender = 'DELETE-ADD';
-  } else if (isSameCustomComponent) {
-    newVdom.needRerender = 'UPDATE';
-  }
+  const isSameCustomComponent = checkSameCustomComponent({
+    originalVdom,
+    newVdom,
+  });
 
   if (!originalVdom || !isSameCustomComponent) {
     newVdom = newVdom();
@@ -64,11 +59,19 @@ function processingComponent({ originalVdom, newVdom }) {
     newVdom.children = newVdom.children.map((item, index) => {
       return makeNewVdomTree({
         newVdom: item,
-        originalVdom: originalVdom[index],
+        originalVdom: originalVdom.children[index],
       });
     });
 
     newVdom.el = originalVdom.el;
+  }
+
+  if (!originalVdom) {
+    newVdom.needRerender = 'ADD';
+  } else if (!isSameCustomComponent) {
+    newVdom.needRerender = 'DELETE-ADD';
+  } else if (isSameCustomComponent) {
+    newVdom.needRerender = 'UPDATE';
   }
 
   return newVdom;
@@ -79,7 +82,12 @@ function processingComponent({ originalVdom, newVdom }) {
  * 추후 키값 있을때는 원본 엘리먼트를 유지하도록 개선 예정
  */
 function processingLoopElement({ originalVdom, newVdom }) {
-  const isSameLoopElement = checkSameLoopElement(originalVdom, newVdom);
+  const isSameLoopElement = checkSameLoopElement({ originalVdom, newVdom });
+
+  // Todo: 일단 항상 다시 돔에 반영
+  newVdom.children = newVdom.children.map(item => {
+    return makeNewVdomTree({ newVdom: item });
+  });
 
   if (!originalVdom) {
     newVdom.needRerender = 'ADD';
@@ -89,17 +97,12 @@ function processingLoopElement({ originalVdom, newVdom }) {
     newVdom.needRerender = 'UPDATE';
   }
 
-  // Todo: 일단 항상 다시 돔에 반영
-  newVdom.children = newVdom.children.map(item => {
-    return makeNewVdomTree({ newVdom: item });
-  });
-
   return newVdom;
 }
 
 // renrender ok1
 function processingTextElement({ originalVdom, newVdom }) {
-  const isSameTextElement = checkSameTextElement(originalVdom, newVdom);
+  const isSameTextElement = checkSameTextElement({ originalVdom, newVdom });
 
   if (!originalVdom) {
     newVdom.needRerender = 'ADD';
@@ -129,11 +132,19 @@ function processingTagElement({ originalVdom, newVdom }) {
     newVdom.children = newVdom.children.map((item, index) => {
       return makeNewVdomTree({
         newVdom: item,
-        originalVdom: originalVdom[index],
+        originalVdom: originalVdom.children[index],
       });
     });
 
     newVdom.el = originalVdom.el;
+  }
+
+  if (!originalVdom) {
+    newVdom.needRerender = 'ADD';
+  } else if (!isSameTagElement) {
+    newVdom.needRerender = 'DELETE-ADD';
+  } else if (isSameTagElement) {
+    newVdom.needRerender = 'UPDATE';
   }
 
   return newVdom;
@@ -159,7 +170,7 @@ function processingFragment({ originalVdom, newVdom }) {
       (item, index) => {
         return makeNewVdomTree({
           newVdom: item,
-          originalVdom: originalVdom[index],
+          originalVdom: originalVdom.children[index],
         });
       }
     );
@@ -193,7 +204,7 @@ function checkEmptyElement(vDom) {
   return !vDom.type;
 }
 
-function checkSameCustomComponent(originalVdom, newVdom) {
+function checkSameCustomComponent({ originalVdom, newVdom }) {
   return newVdom.tagName === originalVdom?.tagName;
 }
 
@@ -213,5 +224,5 @@ function checkSameLoopElement({ originalVdom, newVdom }) {
 }
 
 function checkSameTextElement({ originalVdom, newVdom }) {
-  return originalVdom?.type === newVdom.type;
+  return originalVdom?.text === newVdom.text;
 }
