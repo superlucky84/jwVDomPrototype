@@ -30,14 +30,15 @@ export function vDomUpdate(newVdomTree) {
 
 function typeDeleteAdd(newVdom) {
   console.log('DELTE-ADD');
+
+  const newElement = vDomToDom(newVdom);
   const element = newVdom.el;
 
-  if (element) {
+  if (element && newVdom.oldProps) {
     removeEvent(newVdom.oldProps, element);
-    updateProps(newVdom.props, element);
-
-    delete newVdom.oldProps;
   }
+
+  console.log('PARENTNODE - ', element.parentNode);
 }
 
 function typeUpdate(newVdom) {
