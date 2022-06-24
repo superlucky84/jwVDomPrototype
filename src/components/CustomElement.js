@@ -4,7 +4,6 @@ import Custom2 from './Custom2';
 export default function CustomElement({ props, children, useState }) {
   const [j, setJ] = useState(3);
   const handle = () => {
-    console.log('k');
     setJ(j + 1);
   };
 

@@ -16,26 +16,3 @@ export const useState = ({ initValue, stateKey, stateCallSeq, render }) => {
 
   return [value[stateKey][currentSubSeq], setData];
 };
-
-/*
-useState: initValue => {
-  const state = useState({
-    initValue,
-    stateCallSeq,
-    render: () => {
-      redrawCustomComponent({ tag, props, children, prevVDom });
-    },
-  });
-
-  stateCallSeq += 1;
-
-  return state;
-},
-
-function redrawCustomComponent({ tag, props, children, prevVDom }) {
-  const newVDom = makeCustemElement({ tag, props, children });
-
-  console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOM  - ', newVDom);
-}
-*/
