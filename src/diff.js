@@ -44,7 +44,7 @@ export default function makeNewVdomTree({ originalVdom, newVdom }) {
     resultVdom = processingNullElement({ originalVdom, newVdom });
   }
 
-  resultVdom.oldProps = originalVdom.props;
+  resultVdom.oldProps = originalVdom?.props;
 
   return resultVdom;
 }
@@ -118,7 +118,9 @@ function processingTextElement({ originalVdom, newVdom }) {
     newVdom.needRerender = 'DELETE-ADD';
   }
 
-  newVdom.el = originalVdom.el;
+  if (originalVdom?.el) {
+    newVdom.el = originalVdom.el;
+  }
 
   return newVdom;
 }
@@ -126,17 +128,22 @@ function processingTextElement({ originalVdom, newVdom }) {
 function processingNullElement({ originalVdom, newVdom }) {
   newVdom.needRerender = 'DELETE';
 
+  if (originalVdom?.el) {
+    newVdom.el = originalVdom.el;
+  }
+
   return newVdom;
 }
 
 function processingTagElement({ originalVdom, newVdom }) {
   const isSameTagElement = checkSameTagElement({ originalVdom, newVdom });
+  const existOriginalVdom = originalVdom && originalVdom.type;
 
-  if (!originalVdom || !isSameTagElement) {
+  if (!existOriginalVdom || !isSameTagElement) {
     newVdom.children = newVdom.children.map(item => {
       return makeNewVdomTree({ newVdom: item });
     });
-  } else if (originalVdom && isSameTagElement) {
+  } else if (existOriginalVdom && isSameTagElement) {
     newVdom.children = newVdom.children.map((item, index) => {
       return makeNewVdomTree({
         newVdom: item,
@@ -147,7 +154,7 @@ function processingTagElement({ originalVdom, newVdom }) {
     newVdom.el = originalVdom.el;
   }
 
-  if (!originalVdom) {
+  if (!existOriginalVdom) {
     newVdom.needRerender = 'ADD';
   } else if (!isSameTagElement) {
     newVdom.needRerender = 'DELETE-ADD';

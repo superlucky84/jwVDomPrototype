@@ -15,6 +15,7 @@ export default function CustomElement({ props, children, useState }) {
     <div class={`aa${j}`} kk={j}>
       <span onClick={handle}>{j}-vava</span>
       <span onClick={handle2}>{w}-vava</span>
+      {j % 2 === 0 ? <div>1111</div> : null}
       <Custom2 k={j} />
       <Custom2 k={j + 1} />
       <div>

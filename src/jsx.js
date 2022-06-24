@@ -38,7 +38,7 @@ function redrawCustomComponent({ tag, props, children, prevVDom }) {
   brothers.splice(index, 1, newVdomTree);
 
   console.log('PREVVDOM - ', prevVDom);
-  // console.log('NEWVDOMTREE - ', newVdomTree);
+  console.log('NEWVDOMTREE -- ', newVdomTree);
   vDomUpdate(newVdomTree);
 
   NEED_DIFF = false;

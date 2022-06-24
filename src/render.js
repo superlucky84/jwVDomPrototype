@@ -14,8 +14,10 @@ export function vDomUpdate(newVdomTree) {
   // ADD, DELETE, DELETE-ADD, UPDATE, NONE
   switch (needRerender) {
     case 'ADD':
+      typeAdd(newVdomTree);
       break;
     case 'DELETE':
+      typeDelete(newVdomTree);
       break;
     case 'DELETE-ADD':
       typeDeleteAdd(newVdomTree);
@@ -28,17 +30,43 @@ export function vDomUpdate(newVdomTree) {
   }
 }
 
+function typeDelete(newVdom) {
+  const parent = newVdom?.el?.parentNode;
+
+  if (parent) {
+    parent.removeChild(newVdom.el);
+    delete newVdom.el;
+  }
+}
+
+function typeAdd(newVdom) {
+  const newElement = vDomToDom(newVdom);
+  const brothers = newVdom.getBrothers();
+
+  const index = brothers.indexOf(newVdom);
+  const nextIndex = index + 1;
+
+  const nextEl = brothers[nextIndex].el;
+  const parentEl = nextEl.parentNode;
+
+  parentEl.insertBefore(newElement, nextEl);
+}
+
 function typeDeleteAdd(newVdom) {
-  console.log('DELTE-ADD', newVdom);
+  console.log('DELTE-ADD', newVdom.type);
 
   // const parentVdom = newVdom.getParent();
   // const parentDiv = parentVdom.el;
   // const newElement = vDomToDom(newVdom);
-  const element = newVdom.el;
-
-  if (element && newVdom.oldProps) {
-    removeEvent(newVdom.oldProps, element);
+  if (newVdom.type === 'text') {
+    typeDeleteAddForText(newVdom);
+  } else {
+    console.log('TTTTTTTTTYPE', newVdom.type);
   }
+
+  // if (element && newVdom.oldProps) {
+  // removeEvent(newVdom.oldProps, element);
+  // }
   // console.log('parentEL - ', parentVdom.el);
 
   // console.log('1111', newVdom.getParent());
@@ -46,9 +74,13 @@ function typeDeleteAdd(newVdom) {
 
   // console.log('-------------------------');
   // console.log(newVdom.el);
-  element.nodeValue = newVdom.text;
 
   // parentDiv.replaceChild(newVdom.el, newElement);
+}
+
+function typeDeleteAddForText(newVdom) {
+  const element = newVdom.el;
+  element.nodeValue = newVdom.text;
 }
 
 function typeUpdate(newVdom) {
