@@ -11,6 +11,7 @@
  * 4. props와 datark 오리지날 가상동과 얕은비교를 통해 틀리다면 children을 루프톨면서 배교해줌 (일단 구현생략)
  * 5. loop 타입은 일단 항상 다시 그리고 나중에 개선 (일단 구현 생략)
  *
+ *
  * * 돔 반영 필요 상태
  * * * ADD, DELETE, DELETE-ADD, UPDATE, NONE
  * * * * (ADD). 오리지날이 없으면 추가되는 돔이므로 (추가, children들까지 재귀돌면서 전부 추가)
@@ -116,6 +117,8 @@ function processingTextElement({ originalVdom, newVdom }) {
   } else {
     newVdom.needRerender = 'DELETE-ADD';
   }
+
+  newVdom.el = originalVdom.el;
 
   return newVdom;
 }

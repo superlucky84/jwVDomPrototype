@@ -29,16 +29,26 @@ export function vDomUpdate(newVdomTree) {
 }
 
 function typeDeleteAdd(newVdom) {
-  console.log('DELTE-ADD');
+  console.log('DELTE-ADD', newVdom);
 
-  const newElement = vDomToDom(newVdom);
+  // const parentVdom = newVdom.getParent();
+  // const parentDiv = parentVdom.el;
+  // const newElement = vDomToDom(newVdom);
   const element = newVdom.el;
 
   if (element && newVdom.oldProps) {
     removeEvent(newVdom.oldProps, element);
   }
+  // console.log('parentEL - ', parentVdom.el);
 
-  console.log('PARENTNODE - ', element.parentNode);
+  // console.log('1111', newVdom.getParent());
+  // console.log('ELEMENT - ', newVdom);
+
+  // console.log('-------------------------');
+  // console.log(newVdom.el);
+  element.nodeValue = newVdom.text;
+
+  // parentDiv.replaceChild(newVdom.el, newElement);
 }
 
 function typeUpdate(newVdom) {
