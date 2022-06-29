@@ -10,9 +10,7 @@ export default function useState(initValue) {
     initValue,
     stateCallSeq: stateCallSeq.value,
     stateKey: sKey,
-    render: () => {
-      componentKeyMap[sKey]();
-    },
+    render: () => componentKeyMap[sKey](),
   });
 
   stateCallSeq.value += 1;
