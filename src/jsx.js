@@ -1,6 +1,6 @@
 import makeNewVdomTree from './diff';
 import { vDomUpdate } from './render';
-import { componentKeyMap, tagRef, stateKeyRef, stateCallSeq } from './useState';
+import { componentKeyMap, stateKeyRef, stateCallSeq } from './useState';
 let NEED_DIFF = false;
 let renderDepth = 0;
 let RERENDER_STACK = [];
@@ -58,7 +58,6 @@ function makeCustemNode({ tag, props, children }) {
       children,
     });
 
-    tagRef.value = tag;
     componentKeyMap[stateKey] = () => {
       redrawCustomComponent({
         tag,
