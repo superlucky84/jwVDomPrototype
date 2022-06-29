@@ -1,6 +1,6 @@
 let value = {};
 
-export const useState = ({ initValue, stateKey, stateCallSeq, render }) => {
+export const makeState = ({ initValue, stateKey, stateCallSeq, render }) => {
   const currentSubSeq = stateCallSeq;
 
   if (!value[stateKey] || !value[stateKey][currentSubSeq]) {
@@ -13,6 +13,8 @@ export const useState = ({ initValue, stateKey, stateCallSeq, render }) => {
     value[stateKey][currentSubSeq] = newValue;
     render();
   };
+
+  console.log('VALUEEEE', value);
 
   return [value[stateKey][currentSubSeq], setData];
 };

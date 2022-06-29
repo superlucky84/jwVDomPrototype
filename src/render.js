@@ -53,7 +53,7 @@ function typeAdd(newVdom) {
 }
 
 function typeDeleteAdd(newVdom) {
-  console.log('DELTE-ADD', newVdom.type);
+  // console.log('DELTE-ADD', newVdom.type);
 
   // const parentVdom = newVdom.getParent();
   // const parentDiv = parentVdom.el;
@@ -61,7 +61,7 @@ function typeDeleteAdd(newVdom) {
   if (newVdom.type === 'text') {
     typeDeleteAddForText(newVdom);
   } else {
-    console.log('TTTTTTTTTYPE', newVdom.type);
+    // console.log('TTTTTTTTTYPE', newVdom.type);
   }
 
   // if (element && newVdom.oldProps) {
@@ -109,7 +109,7 @@ function updateProps(props, element) {
     if (dataKey === 'style') {
       addStyle(vDom, element);
     } else if (dataKey === 'onClick') {
-      console.log('KK - ', element.onclick);
+      // console.log('KK - ', element.onclick);
       element.addEventListener('click', dataValue);
     } else {
       element.setAttribute(dataKey, dataValue);

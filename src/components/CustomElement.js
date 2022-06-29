@@ -1,7 +1,8 @@
 import { h, Fragment } from '../jsx';
+import useState from '../useState';
 import Custom2 from './Custom2';
 
-export default function CustomElement({ props, children, useState }) {
+export default function CustomElement({ props, children }) {
   const [j, setJ] = useState(3);
   const [w, setW] = useState(3);
   const handle = () => {
@@ -19,8 +20,8 @@ export default function CustomElement({ props, children, useState }) {
       <Custom2 k={j} />
       <Custom2 k={j + 1} />
       <div>
-        <div>1{j}</div>
-        <div>2{w}</div>
+        <div>{j}</div>
+        <div>{w}</div>
       </div>
     </div>
   );

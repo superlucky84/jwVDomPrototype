@@ -1,6 +1,6 @@
-import { useState } from './hook';
 import makeNewVdomTree from './diff';
 import { vDomUpdate } from './render';
+import { componentKeyMap, tagRef, stateKeyRef, stateCallSeq } from './useState';
 let NEED_DIFF = false;
 let renderDepth = 0;
 let RERENDER_STACK = [];
@@ -38,7 +38,8 @@ function redrawCustomComponent({ tag, props, children, prevVDom }) {
   brothers.splice(index, 1, newVdomTree);
 
   console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOMTREE -- ', newVdomTree);
+  console.log('NEWVDOMTREE - ', newVdomTree);
+
   vDomUpdate(newVdomTree);
 
   NEED_DIFF = false;
@@ -46,34 +47,27 @@ function redrawCustomComponent({ tag, props, children, prevVDom }) {
 
 function makeCustemNode({ tag, props, children }) {
   const resolve = stateKey => {
-    let stateCallSeq = 0;
     if (!stateKey) {
-      stateKey = Symbol();
+      stateKey = Symbol(tag.name);
     }
+    stateCallSeq.value = 0;
+    stateKeyRef.value = stateKey;
+
     const customNode = tag({
       props,
       children,
-      useState: initValue => {
-        const state = useState({
-          initValue,
-          stateCallSeq,
-          stateKey,
-          render: () => {
-            redrawCustomComponent({
-              tag,
-              props,
-              children,
-              prevVDom: customNode,
-              stateKey,
-            });
-          },
-        });
-
-        stateCallSeq += 1;
-
-        return state;
-      },
     });
+
+    tagRef.value = tag;
+    componentKeyMap[stateKey] = () => {
+      redrawCustomComponent({
+        tag,
+        props,
+        children,
+        prevVDom: customNode,
+        stateKey,
+      });
+    };
 
     customNode.tagName = tag.name;
     customNode.stateKey = stateKey;
