@@ -32,7 +32,5 @@ function makeState({ initValue, stateKey, stateCallSeq, render }) {
     render();
   };
 
-  console.log('VALUEEEE', value);
-
   return [value[stateKey][currentSubSeq], setData];
 }

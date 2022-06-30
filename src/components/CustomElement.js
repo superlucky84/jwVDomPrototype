@@ -1,5 +1,5 @@
 import { h, Fragment } from '../jsx';
-import useState from '../useState';
+import useState from '@/hook/useState';
 import Custom2 from './Custom2';
 
 export default function CustomElement({ props, children }) {

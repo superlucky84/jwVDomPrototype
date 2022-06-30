@@ -1,7 +1,4 @@
-import { addKey } from './keyManager';
 export function render(vDom, wrapElement) {
-  // addKey(vDom);
-  // console.log(vDom);
   wrapElement.appendChild(vDomToDom(vDom));
 }
 
@@ -109,7 +106,6 @@ function updateProps(props, element) {
     if (dataKey === 'style') {
       addStyle(vDom, element);
     } else if (dataKey === 'onClick') {
-      // console.log('KK - ', element.onclick);
       element.addEventListener('click', dataValue);
     } else {
       element.setAttribute(dataKey, dataValue);
@@ -118,6 +114,7 @@ function updateProps(props, element) {
 }
 
 function vDomToDom(vDom) {
+  console.log('VDOM - ', vDom.tagName);
   let element;
   const { type, tag, text, props, children = [] } = vDom;
 
@@ -147,6 +144,7 @@ function vDomToDom(vDom) {
   }
 
   vDom.el = element;
+
   return element;
 }
 

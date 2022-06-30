@@ -1,9 +1,7 @@
 import makeNewVdomTree from './diff';
 import { vDomUpdate } from './render';
-import { componentKeyMap, stateKeyRef, stateCallSeq } from './useState';
+import { componentKeyMap, stateKeyRef, stateCallSeq } from '@/hook/useState';
 let NEED_DIFF = false;
-let renderDepth = 0;
-let RERENDER_STACK = [];
 
 export function Fragment({ props, children }) {
   return { type: 'fragment', props, children };
@@ -37,9 +35,6 @@ function redrawCustomComponent({ tag, props, children, prevVDom }) {
 
   brothers.splice(index, 1, newVdomTree);
 
-  console.log('PREVVDOM - ', prevVDom);
-  console.log('NEWVDOMTREE - ', newVdomTree);
-
   vDomUpdate(newVdomTree);
 
   NEED_DIFF = false;
@@ -57,15 +52,10 @@ function makeCustemNode({ tag, props, children }) {
       props,
       children,
     });
+    const prevVDom = customNode;
 
     componentKeyMap[stateKey] = () => {
-      redrawCustomComponent({
-        tag,
-        props,
-        children,
-        prevVDom: customNode,
-        stateKey,
-      });
+      redrawCustomComponent({ tag, props, children, prevVDom, stateKey });
     };
 
     customNode.tagName = tag.name;
