@@ -1,6 +1,7 @@
-import useData from '../useData';
+import { mounted, updated, useData, useRef } from './hook';
 
 export default function NewStyleComponent() {
+  const elementRef = useRef();
   const data = useData({
     a: 1,
     b: 2,
@@ -11,12 +12,21 @@ export default function NewStyleComponent() {
     data.b = 8;
   };
 
-  return {
-    render: () => (
+  const effectHandle = () => {
+    console.log(data.a, elementRef);
+  };
+
+  const componentMaker = () => {
+    mounted(effectHandle);
+    updated(effectHandle, [data.a, data.b]);
+
+    return (
       <Fragment>
         <div onClick={handle}>{data.a}</div>
-        <div>{data.b}</div>
+        <div ref={elementRef}>{data.b}</div>
       </Fragment>
-    ),
+    );
   };
+
+  return componentMaker;
 }
