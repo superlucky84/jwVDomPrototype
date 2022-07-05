@@ -26,3 +26,22 @@ export default function CustomElement({ props, children }) {
     </div>
   );
 }
+
+/*
+h("div", {}, 
+  h("span", {}, j, "-vava"), 
+  h("span", {}, w, "-vava"), 
+  j % 2 === 0 ? h("div", null, "1111") : null, 
+  h(Custom2, {}),
+  h(Custom2, {}),
+  h("div", null, 
+    h("div", null, j),
+    h("div", null, w)));
+
+
+function k(n) {
+  console.log('k', n);
+}
+
+k(7, k(1), k(2, k(4), k(5), k(6)), k(3));
+*/
