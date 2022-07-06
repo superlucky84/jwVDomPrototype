@@ -1,14 +1,3 @@
 
-## 설치 및 devserver 실행
-
-```bash
-npm install
-npm run serve
-```
-
-## 빌드
-
-```bash
-npm run build
-```
+## jsvdom 프로토타이핑
 
